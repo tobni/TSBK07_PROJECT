@@ -1,10 +1,10 @@
 #include "readraw.h"
 
 
-std::vector<GLuint> readRaw2Vec(const std::string & filename, int x_dim, int y_dim, int z_dim)
+std::vector<GLubyte> readRaw2Vec(const std::string & filename, int x_dim, int y_dim, int z_dim)
 {
 	std::ifstream infile;
-	std::vector<GLuint> volumeArray;
+	std::vector<GLubyte> volumeArray;
 	GLuint bytes = x_dim * y_dim * z_dim;
 
 	infile.open(filename, std::ios::binary);

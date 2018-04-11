@@ -10,5 +10,5 @@
 #include <vector>
 #include <iterator>
 
-std::vector<GLuint> readRaw2Vec(const std::string & filename, int x_dim, int y_dim, int z_dim);
+std::vector<GLubyte> readRaw2Vec(const std::string & filename, int x_dim, int y_dim, int z_dim);
 #endif // readraw_h

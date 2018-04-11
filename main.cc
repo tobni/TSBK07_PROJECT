@@ -8,6 +8,16 @@
 
 #include "readraw.h"
 
+
+
+int XDIM = 256;
+int YDIM = 256;
+int ZDIM = 256;
+
+std::vector<GLubyte> volumeArray;
+
+GLuint textureID;
+
 void init(void)
 {
 	// GL inits
@@ -16,6 +26,20 @@ void init(void)
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_TRUE);
 
+	volumeArray = readRaw2Vec("MRI-Head.raw", XDIM, YDIM, ZDIM);
+
+	//load data into a 3D texture
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_3D, textureID);
+
+	// set the texture parameters
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_INTENSITY, XDIM, YDIM, ZDIM, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, &volumeArray.front());
 }
 
 
@@ -28,15 +52,10 @@ void display(void)
 	glutSwapBuffers();
 }
 
-int XDIM = 256;
-int YDIM = 256;
-int ZDIM = 256;
 
 
 int main(int argc, char *argv[])
 {
-	std::vector<GLuint> volumeArray = readRaw2Vec("MRI-Head.raw", XDIM, YDIM, ZDIM);
-	std::cout << volumeArray.size();
 	glutInit(&argc, argv);
 	glutInitContextVersion(3, 2);
 	glutCreateWindow ("TSBK07");
