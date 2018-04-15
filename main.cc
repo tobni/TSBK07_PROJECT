@@ -16,7 +16,9 @@ int ZDIM = 256;
 
 std::vector<GLubyte> volumeArray;
 
-GLuint textureID;
+GLuint volTex, shader;
+
+mat4 projectionMatrix;
 
 void init(void)
 {
@@ -25,12 +27,20 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_TRUE);
+	printError("GL inits");
 
-	volumeArray = readRaw2Vec("MRI-Head.raw", XDIM, YDIM, ZDIM);
+	projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 50.0);
+
+	// Load and compile shader
+	shader = loadShaders("raycast.vert", "raycast.frag");
+	glUseProgram(shader);
+	printError("init shader");
 
 	//load data into a 3D texture
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_3D, textureID);
+	volumeArray = readRaw2Vec("MRI-Head.raw", XDIM, YDIM, ZDIM);
+
+	glGenTextures(1, &volTex);
+	glBindTexture(GL_TEXTURE_3D, volTex);
 
 	// set the texture parameters
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -57,13 +67,13 @@ void display(void)
 int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitContextVersion(3, 2);
 	glutCreateWindow ("TSBK07");
 #ifdef WIN32
 	glewInit();
 #endif
 	glutDisplayFunc(display); 
-
 	init ();
 	glutMainLoop();
 	exit(0);
