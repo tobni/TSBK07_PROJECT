@@ -6,6 +6,7 @@ in vec3 exPos;
 
 out vec3 outColor;
 
+uniform sampler3D volTex;
 
 void main(void)
 {

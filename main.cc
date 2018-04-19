@@ -8,17 +8,32 @@
 
 #include "readraw.h"
 
-
-
 int XDIM = 256;
 int YDIM = 256;
 int ZDIM = 256;
 
-std::vector<GLubyte> volumeArray;
+std::vector<GLubyte> volume_array;
 
-GLuint volTex, shader;
+Model *m_quad;
 
-mat4 projectionMatrix;
+
+GLuint vol_tex, shader;
+
+mat4 proj_mat;
+
+
+GLfloat quad[] = {	
+	-0.5f, -0.5f, 0.f, // 0
+	-0.5f, 0.5f, 0.f, // 1
+	0.5f, 0.5f, 0.f, // 2
+	0.5, -0.5f, 0.f }; // 3
+GLuint quad_ind[] = { 0, 1, 2, 0, 2, 3 };
+
+GLfloat quad_tex[] = {
+	-1, -1,
+	-1, 1,
+	1, 1,
+	1, -1 };
 
 void init(void)
 {
@@ -29,7 +44,7 @@ void init(void)
 	glCullFace(GL_TRUE);
 	printError("GL inits");
 
-	projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 50.0);
+	proj_mat = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 50.0);
 
 	// Load and compile shader
 	shader = loadShaders("raycast.vert", "raycast.frag");
@@ -37,10 +52,10 @@ void init(void)
 	printError("init shader");
 
 	//load data into a 3D texture
-	volumeArray = readRaw2Vec("MRI-Head.raw", XDIM, YDIM, ZDIM);
+	volume_array = readRaw2Vec("MRI-Head.raw", XDIM, YDIM, ZDIM);
 
-	glGenTextures(1, &volTex);
-	glBindTexture(GL_TEXTURE_3D, volTex);
+	glGenTextures(1, &vol_tex);
+	glBindTexture(GL_TEXTURE_3D, vol_tex);
 
 	// set the texture parameters
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -49,7 +64,12 @@ void init(void)
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_INTENSITY, XDIM, YDIM, ZDIM, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, &volumeArray.front());
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_INTENSITY, XDIM, YDIM, ZDIM, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, &volume_array.front());
+
+	// Upload the quad
+
+	m_quad = LoadDataToModel(quad, NULL, quad_tex, NULL, quad_ind, 4, 6);
+
 }
 
 
@@ -59,6 +79,10 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	glUniform1i(glGetUniformLocation(shader, "texVol"), 2);
+
+	DrawModel(m_quad, shader, "inPos", NULL, "inTexCoord");
+
 	glutSwapBuffers();
 }
 

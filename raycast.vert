@@ -1,12 +1,14 @@
 #version 150
 
 in vec3 inPos;
+in inTexCoord;
 
+out vec2 exTexCoord;
 out vec3 exPos;
-out vec3 enPos;
+
+//uniform mat4 transMat;
 
 void main(void)
 {
-
-	gl_Position = transMat * vec4(inPos, 1.0);
+	gl_Position = vec4(inPos, 1.0);
 }
