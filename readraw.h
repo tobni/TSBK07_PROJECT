@@ -11,4 +11,6 @@
 #include <iterator>
 
 std::vector<GLubyte> readRaw2Vec(const std::string & filename, int x_dim, int y_dim, int z_dim);
+
+GLubyte* readRaw2cArray(const char* filename, int x_dim, int y_dim, int z_dim);
 #endif // readraw_h

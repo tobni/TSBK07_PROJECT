@@ -17,5 +17,20 @@ std::vector<GLubyte> readRaw2Vec(const std::string & filename, int x_dim, int y_
 		std::istream_iterator<GLubyte>());
 	infile.close();
 
+
+
+	return volumeArray;
+}
+
+GLubyte* readRaw2cArray(const char* filename, int x_dim, int y_dim, int z_dim)
+{
+	const int size = x_dim * y_dim * z_dim;
+
+	FILE *file = fopen(filename, "rb");
+
+	GLubyte* volumeArray = new GLubyte[size];
+	fread(volumeArray, sizeof(GLubyte), size, file);
+	fclose(file);
+
 	return volumeArray;
 }
