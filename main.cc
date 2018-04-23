@@ -17,9 +17,9 @@ GLubyte* volume_array;
 Model *m_quad;
 
 GLuint vol_tex, shader;
-GLfloat step_size;
+GLfloat step_size, focal_length = 1.0, angle_y, angle_x, alpha_val = 0.1;
 
-mat4 proj_mat;
+mat4 rot_mat;
 
 
 GLfloat quad[] = { 
@@ -39,7 +39,7 @@ GLfloat quad_tex[] = {
 void init(void)
 {
 	// GL inits
-	glClearColor(0.0,0.0,0.0,0);
+	glClearColor(1.0,1.0,1.0,0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -80,15 +80,72 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(shader);
-	
+
+	rot_mat = Ry(M_PI * angle_y);
+	rot_mat = Mult(Rx(M_PI * angle_x), rot_mat);
+	rot_mat = Mult(rot_mat, T(-0.5, -0.5, -0.5));
+	rot_mat = Mult(T(0.5, 0.5, 0.5), rot_mat);
+
 	glUniform1i(glGetUniformLocation(shader, "texVol"), 0); // Texture unit 0
 	glUniform1f(glGetUniformLocation(shader, "stepSize"), step_size);
-
+	glUniform1f(glGetUniformLocation(shader, "focalLength"), focal_length);
+	glUniform1f(glGetUniformLocation(shader, "alphaScale"), alpha_val);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "rotMat"), 1, GL_TRUE, rot_mat.m);
+	
 	DrawModel(m_quad, shader, "inPos", NULL, "inTexCoord");
 
 	glutSwapBuffers();
 }
 
+void updateFocalLength(const float val)
+{
+	focal_length += val;
+	if (focal_length < 0.0) {
+		focal_length = 0.0;
+	}
+}
+
+void keyboard(unsigned char c, int x, int y)
+{
+	switch (c)
+	{
+	case 27:
+		exit(0);
+		break;
+	case 'w':
+		updateFocalLength(-0.01);
+		glutPostRedisplay();
+		break;
+	case 's':
+		updateFocalLength(0.01);
+		glutPostRedisplay();
+		break;
+	case 'a':
+		angle_y += 0.01;
+		glutPostRedisplay();
+		break;
+	case 'd':
+		angle_y -= 0.01;
+		glutPostRedisplay();
+		break;
+	case ',':
+		angle_x -= 0.01;
+		glutPostRedisplay();
+		break;
+	case '.':
+		angle_x += 0.01;
+		glutPostRedisplay();
+		break;
+	case '-':
+		alpha_val -= 0.001;
+		glutPostRedisplay();
+		break;
+	case '+':
+		alpha_val += 0.001;
+		glutPostRedisplay();
+		break;
+	}
+}
 
 
 int main(int argc, char *argv[])
@@ -99,6 +156,7 @@ int main(int argc, char *argv[])
 #ifdef WIN32
 	glewInit();
 #endif
+	glutKeyboardFunc(keyboard);
 	glutDisplayFunc(display); 
 	init();
 	glutMainLoop();
