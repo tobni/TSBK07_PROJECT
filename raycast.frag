@@ -7,6 +7,7 @@ out vec4 outColor;
 uniform sampler3D	texVol;
 uniform float		stepSize;
 uniform float		focalLength;
+uniform float		distance;
 uniform float		alphaScale;
 uniform mat4		rotMat;
 
@@ -18,10 +19,10 @@ void main(void)
 	float alpha = 0;
 	
 
-	vec3 prp = vec3(0.5, 0.5, focalLength);
+	vec3 prp = vec3(0.5, 0.5, -focalLength);
 	vec3 rayDir = vec3(texCoord, 0.0) - prp;
 	vec3 rayStep = normalize(rayDir)*stepSize;
-	vec3 voxelCoord = vec3(texCoord, focalLength);
+	vec3 voxelCoord = vec3(texCoord, distance);
 
 	float intensitySample, alphaSample;	
 

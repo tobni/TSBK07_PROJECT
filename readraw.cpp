@@ -17,8 +17,6 @@ std::vector<GLubyte> readRaw2Vec(const std::string & filename, int x_dim, int y_
 		std::istream_iterator<GLubyte>());
 	infile.close();
 
-
-
 	return volumeArray;
 }
 
@@ -32,11 +30,34 @@ GLubyte* readRaw2cArray(const char* filename, int x_dim, int y_dim, int z_dim)
 	fread(volumeArray, sizeof(GLubyte), size, file);
 	fclose(file);
 
-	//clear first and last slice to 0
-	memset(volumeArray, 0, sizeof(GLubyte)*x_dim*y_dim);
-	GLubyte* temp = volumeArray;
-	memset((volumeArray + (size - (sizeof(GLubyte)*x_dim*y_dim))), 0, sizeof(GLubyte)*x_dim*y_dim);
-	volumeArray = temp;
+	// Clear first and last slices to 0
+	for (int z = 0; z < z_dim; z++)
+	{
+		for (int y = 0; y < y_dim; y++)
+		{
+			for (int x = 0; x < x_dim; x++)
+			{
+				if ((x == 0) || (x == 255) ||
+					(y == 0) || (y == 255) ||
+					(z == 0) || (z == 255)) {
+				volumeArray[x + y*x_dim + z*x_dim*y_dim] = GLubyte(0);
+				}
+			}
+		}
+	}
+
+	return volumeArray;
+}
+
+GLushort* readRaw2cArray16bit(const char* filename, int x_dim, int y_dim, int z_dim)
+{
+	const int size = x_dim * y_dim * z_dim;
+
+	FILE *file = fopen(filename, "rb");
+
+	GLushort* volumeArray = new GLushort[size];
+	fread(volumeArray, sizeof(GLushort), size, file);
+	fclose(file);
 
 	return volumeArray;
 }

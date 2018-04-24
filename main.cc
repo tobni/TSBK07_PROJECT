@@ -17,7 +17,7 @@ GLubyte* volume_array;
 Model *m_quad;
 
 GLuint vol_tex, shader;
-GLfloat step_size, focal_length = 1.0, angle_y, angle_x, alpha_val = 0.1;
+GLfloat step_size, focal_length = 2.0, distance = 0.0,  angle_y, angle_x, alpha_val = 0.1;
 
 mat4 rot_mat;
 
@@ -89,20 +89,14 @@ void display(void)
 	glUniform1i(glGetUniformLocation(shader, "texVol"), 0); // Texture unit 0
 	glUniform1f(glGetUniformLocation(shader, "stepSize"), step_size);
 	glUniform1f(glGetUniformLocation(shader, "focalLength"), focal_length);
+	glUniform1f(glGetUniformLocation(shader, "distance"), distance);
 	glUniform1f(glGetUniformLocation(shader, "alphaScale"), alpha_val);
+
 	glUniformMatrix4fv(glGetUniformLocation(shader, "rotMat"), 1, GL_TRUE, rot_mat.m);
 	
 	DrawModel(m_quad, shader, "inPos", NULL, "inTexCoord");
 
 	glutSwapBuffers();
-}
-
-void updateFocalLength(const float val)
-{
-	focal_length += val;
-	if (focal_length < 0.0) {
-		focal_length = 0.0;
-	}
 }
 
 void keyboard(unsigned char c, int x, int y)
@@ -113,11 +107,11 @@ void keyboard(unsigned char c, int x, int y)
 		exit(0);
 		break;
 	case 'w':
-		updateFocalLength(-0.01);
+		distance += 0.01;
 		glutPostRedisplay();
 		break;
 	case 's':
-		updateFocalLength(0.01);
+		distance -= 0.01;
 		glutPostRedisplay();
 		break;
 	case 'a':
