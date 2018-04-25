@@ -37,9 +37,9 @@ GLubyte* readRaw2cArray(const char* filename, int x_dim, int y_dim, int z_dim)
 		{
 			for (int x = 0; x < x_dim; x++)
 			{
-				if ((x == 0) || (x == 255) ||
-					(y == 0) || (y == 255) ||
-					(z == 0) || (z == 255)) {
+				if ((x == 0) || (x == x_dim - 1) ||
+					(y == 0) || (y == y_dim - 1) ||
+					(z == 0) || (z == z_dim - 1)) {
 				volumeArray[x + y*x_dim + z*x_dim*y_dim] = GLubyte(0);
 				}
 			}

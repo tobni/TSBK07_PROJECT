@@ -31,10 +31,10 @@ GLuint quad_ind[] = { 0,1,3,3,1,2 };
 
 
 GLfloat quad_tex[] = { 
-	0.0f, 1.0f,
 	0.0f, 0.0f,
-	1.0f, 0.0f,
-	1.0f, 1.0f };
+	0.0f, 1.0f,
+	1.0f, 1.0f,
+	1.0f, 0.0f };
 
 void init(void)
 {
