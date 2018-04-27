@@ -15,8 +15,9 @@ int ZDIM = 256;
 GLubyte* volume_array;
 Model *m_quad;
 
-GLuint grad_tex, vol_tex, shader;
+GLuint grad_tex, vol_tex, shader, current_frag = 0;
 GLfloat step_size, focal_length = 2.0, distance = 0.0,  angle_y, angle_x, alpha_val = 0.25;
+GLboolean switch_frag = GL_FALSE;
 
 mat4 rot_mat;
 
@@ -80,6 +81,19 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	if (switch_frag && current_frag == 1)
+	{
+		shader = loadShaders("raycast.vert", "raycast.frag");
+		current_frag = 0;
+		switch_frag = GL_FALSE;
+	}
+	else if (switch_frag && current_frag == 0)
+	{
+		shader = loadShaders("raycast.vert", "raycast_old.frag");
+		current_frag = 1;
+		switch_frag = GL_FALSE;
+	};
+
 	glUseProgram(shader);
 
 	rot_mat = Ry(M_PI * angle_y);
@@ -137,6 +151,10 @@ void keyboard(unsigned char c, int x, int y)
 	case '+':
 		alpha_val += 0.001;
 		printf("%f", alpha_val);
+		glutPostRedisplay();
+		break;
+	case 'f':
+		switch_frag = GL_TRUE;
 		glutPostRedisplay();
 		break;
 	}
