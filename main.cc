@@ -17,7 +17,7 @@ GLshort* volume16_array;
 Model *m_quad;
 
 GLuint grad_tex, vol_tex, shader, current_frag = 0;
-GLfloat step_size, focal_length = 2.0, distance = -0.2,  angle_y, angle_x, alpha_val = 0.25;
+GLfloat step_size, focal_length = 2.0, distance = -0.2,  angle_y = 0.0, angle_x = 0.0, alpha_val = 0.25;
 mat4 rot_mat, mdl_mat;
 
 GLint m_viewport[4], window_width = 512, window_height = 512;
@@ -85,10 +85,11 @@ void initVolume()
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_INTENSITY, XDIM, YDIM, ZDIM, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, volume_array);
+	glUniform1i(glGetUniformLocation(shader, "texVol"), 0); // Texture unit 0
 	printError("upload volume");
 
-	step_size = 1.f / XDIM;
-
+	step_size = 1.f / max(max(XDIM, YDIM), ZDIM);
+	glUniform1f(glGetUniformLocation(shader, "stepSize"), step_size);
 }
 
 void init(void)
@@ -111,7 +112,6 @@ void init(void)
 	// Make model out of quad data
 	m_quad = LoadDataToModel(quad, NULL, quad_tex, NULL, quad_ind, 4, 6);
 	
-
 	// Upload the cube to shader
 	glUniform3fv(glGetUniformLocation(shader, "cubeVert"), 8, &cube[0].x);
 	glUniform1iv(glGetUniformLocation(shader, "cubeInd"), 36, &cube_ind[0]);
@@ -133,8 +133,6 @@ void display(void)
 	mdl_mat = Mult(mdl_mat, T(-0.5, -0.5, -0.5));
 	mdl_mat = Mult(T(0.5, 0.5, 0.5), mdl_mat);
 
-	glUniform1i(glGetUniformLocation(shader, "texVol"), 0); // Texture unit 0
-	glUniform1f(glGetUniformLocation(shader, "stepSize"), step_size);
 	glUniform1f(glGetUniformLocation(shader, "focalLength"), focal_length);
 	glUniform1f(glGetUniformLocation(shader, "distance"), distance);
 	glUniform1f(glGetUniformLocation(shader, "alphaScale"), alpha_val);
@@ -228,47 +226,51 @@ void keyboard(unsigned char c, int x, int y)
 			shader = loadShaders("raycast.vert", "raycast.frag");
 			current_frag = 0;
 
-			// Upload the cube to shader
-			glUniform3fv(glGetUniformLocation(shader, "cubeVert"), 8, &cube[0].x);
-			glUniform1iv(glGetUniformLocation(shader, "cubeInd"), 36, &cube_ind[0]);
 		}
 		else if (current_frag == 0) {
 			shader = loadShaders("raycast.vert", "raycast_old.frag");
 			current_frag = 1;
 		};
+		glUniform3fv(glGetUniformLocation(shader, "cubeVert"), 8, &cube[0].x);
+		glUniform1iv(glGetUniformLocation(shader, "cubeInd"), 36, &cube_ind[0]);
+		glUniform1f(glGetUniformLocation(shader, "stepSize"), step_size);
 		break;
 	case 1:
 		XDIM = 256;
 		YDIM = 256;
 		ZDIM = 256;
-
+		delete volume_array;
 		volume_array = readRaw2cArray("MRI-Head.raw", XDIM, YDIM, ZDIM);
 		initVolume();
+		glutPostRedisplay();
 		break;
 
 	case 2:
 		XDIM = 256;
 		YDIM = 256;
 		ZDIM = 44;
-
+		delete volume_array;
 		volume_array = readRaw2cArray("frog.raw", XDIM, YDIM, ZDIM);
 		initVolume();
+		glutPostRedisplay();
 		break;
 	case 3:
 		XDIM = 256;
 		YDIM = 256;
 		ZDIM = 256;
-
+		delete volume_array;
 		volume_array = readRaw2cArray("foot.raw", XDIM, YDIM, ZDIM);
 		initVolume();
+		glutPostRedisplay();
 		break;
 	case 4:
 		XDIM = 384;
 		YDIM = 384;
 		ZDIM = 240;
-
+		delete volume_array;
 		volume_array = readRaw2cArray("CT-chest.raw", XDIM, YDIM, ZDIM);
 		initVolume();
+		glutPostRedisplay();
 		break;
 	}
 }

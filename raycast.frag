@@ -45,7 +45,7 @@ float textureAccess(vec3 voxelCoord, vec3 offset)
 	return texture(texVol, vec3(rotMat * vec4(voxelCoord + stepSize*offset, 1.0))).x;
 }
 
-// NOT DONE. Function to test ray-intersections with bounding-box of triangle.
+// Function to test ray-intersections with bounding-box of triangle.
 vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c, 
 						vec3 rayDir, vec3 quadCoord)
 {	vec3 enPoint = vec3(0,0,0);
@@ -116,7 +116,7 @@ void main(void)
 	vec3 rayStep = rayDir*stepSize;
 
 	// Bounding cube test variables
-	vec3 tempPoint, exPoint, enPoint = vec3(quadCoord);
+	vec3 tempPoint, exPoint = quadCoord, enPoint = quadCoord;
 	vec3 a, b, c;
 	float debug = 1;
 	bool first = true;
@@ -190,11 +190,6 @@ void main(void)
 			alpha = 1.0;
 			break; 
 		}
-		// Stop ray if it has penetrated entire volume
-		if (voxelCoord.z > 1.0) {
-			break;
-		}
-		
 		// Advance the ray
 		voxelCoord += rayStep;
 	}
