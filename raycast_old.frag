@@ -63,7 +63,6 @@ void main(void)
 	// Final values from ray integral
 	float intensity = 0;
 	float alpha = 0;
-	vec3 gradient = vec3(0,0,0);
 
 	// Ray definitions
 	vec3 prp = vec3(0.5, 0.5, -focalLength + distance);
@@ -74,7 +73,6 @@ void main(void)
 	// Bounding cube test variables
 	vec3 tempPoint, exPoint = quadCoord, enPoint = quadCoord;
 	vec3 a, b, c;
-	float debug = 1;
 	bool first = true;
 	for (int triangle = 0; triangle < 12; triangle++)
 	{
