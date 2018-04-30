@@ -20,9 +20,7 @@ GLuint grad_tex, vol_tex, shader, current_frag = 0;
 GLfloat step_size, focal_length = 2.0, distance = -0.2,  angle_y, angle_x, alpha_val = 0.25;
 mat4 rot_mat, mdl_mat;
 
-GLint m_viewport[4];
-
-GLint window_width = 512, window_height = 512;
+GLint m_viewport[4], window_width = 512, window_height = 512;
 
 
 Point3D	cube[] = {
@@ -36,8 +34,6 @@ Point3D	cube[] = {
 	{ 1.0f, 0.0f, 1.0f },
 	{ 1.0f, 1.0f, 1.0f },
 	{ 0.0f, 1.0f, 1.0f } };
-
-
 
 GLfloat quad[] = { 
 	-1.0f,-1.0f,0.0f,
@@ -74,6 +70,7 @@ GLfloat quad_tex[] = {
 	1.0f, 1.0f,
 	1.0f, 0.0f };
 
+
 void initVolume()
 {
 	glActiveTexture(GL_TEXTURE0);
@@ -93,7 +90,6 @@ void initVolume()
 	step_size = 1.f / XDIM;
 
 }
-
 
 void init(void)
 {
@@ -152,24 +148,24 @@ void display(void)
 	char float_array[16]; // will crash if 16 elem isn't enough to store the float
 
 	// X
-	sfDrawString(40, 60, "Rot(X): ");
+	sfDrawString(40, 40, "Rot(X): ");
 	sprintf(float_array, "%f", M_PI * angle_x);
-	sfDrawString(110, 60, float_array);
+	sfDrawString(110, 40, float_array);
 	
 	// Y
-	sfDrawString(40, 80, "Rot(Y): ");
+	sfDrawString(40, 60, "Rot(Y): ");
 	sprintf(float_array, "%f", M_PI * angle_y);
-	sfDrawString(110, 80, float_array);
+	sfDrawString(110, 60, float_array);
 
 	// Distance
-	sfDrawString(40, 100, "Distance: ");
+	sfDrawString(40, 80, "Distance: ");
 	sprintf(float_array, "%f", distance);
-	sfDrawString(120, 100, float_array);
+	sfDrawString(130, 80, float_array);
 
 	// Opacity
-	sfDrawString(40, 120, "Opacity: ");
+	sfDrawString(40, 100, "Opacity: ");
 	sprintf(float_array, "%f", alpha_val);
-	sfDrawString(120, 120, float_array);
+	sfDrawString(120, 100, float_array);
 
 	glutSwapBuffers();
 }
