@@ -20,6 +20,12 @@ GLuint grad_tex, vol_tex, shader, current_frag = 0;
 GLfloat step_size, focal_length = 2.0, distance = -0.2,  angle_y, angle_x, alpha_val = 0.25;
 mat4 rot_mat, mdl_mat;
 
+GLint m_viewport[4];
+GLsizei limit;
+
+GLint window_width = 512, window_height = 512;
+
+
 Point3D	cube[] = {
 	// Front
 	{ 0.0f, 0.0f, 0.0f },
@@ -143,7 +149,23 @@ void display(void)
 
 	DrawModel(m_quad, shader, "inPos", NULL, "inTexCoord");
 
+	// Print info
+	sfDrawString(40, 40, "Testing!");
+
 	glutSwapBuffers();
+}
+
+void reshape(GLsizei w, GLsizei h)
+{
+	GLsizei limit;
+	if (w < h) {
+		limit = w;
+	}
+	else {
+		limit = h;
+	}
+	glViewport(0, 0, limit, limit);
+	sfSetRasterSize(limit, limit);
 }
 
 void keyboard(unsigned char c, int x, int y)
@@ -242,6 +264,9 @@ void keyboard(unsigned char c, int x, int y)
 int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
+	//glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitWindowPosition(50, 50);
+	glutInitWindowSize(window_width, window_height);
 	glutInitContextVersion(3, 2);
 	glutCreateWindow ("TSBK07");
 #ifdef WIN32
@@ -249,7 +274,10 @@ int main(int argc, char *argv[])
 #endif
 	glutKeyboardFunc(keyboard);
 	glutDisplayFunc(display); 
+	glutReshapeFunc(reshape);
 	init();
+	sfMakeRasterFont();
+	sfSetRasterSize(window_width, window_height);
 	glutMainLoop();
 	exit(0);
 }
