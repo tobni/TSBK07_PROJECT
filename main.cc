@@ -21,7 +21,6 @@ GLfloat step_size, focal_length = 2.0, distance = -0.2,  angle_y, angle_x, alpha
 mat4 rot_mat, mdl_mat;
 
 GLint m_viewport[4];
-GLsizei limit;
 
 GLint window_width = 512, window_height = 512;
 
@@ -150,22 +149,41 @@ void display(void)
 	DrawModel(m_quad, shader, "inPos", NULL, "inTexCoord");
 
 	// Print info
-	sfDrawString(40, 40, "Testing!");
+	char float_array[16]; // will crash if 16 elem isn't enough to store the float
+
+	// X
+	sfDrawString(40, 60, "Rot(X): ");
+	sprintf(float_array, "%f", M_PI * angle_x);
+	sfDrawString(110, 60, float_array);
+	
+	// Y
+	sfDrawString(40, 80, "Rot(Y): ");
+	sprintf(float_array, "%f", M_PI * angle_y);
+	sfDrawString(110, 80, float_array);
+
+	// Distance
+	sfDrawString(40, 100, "Distance: ");
+	sprintf(float_array, "%f", distance);
+	sfDrawString(120, 100, float_array);
+
+	// Opacity
+	sfDrawString(40, 120, "Opacity: ");
+	sprintf(float_array, "%f", alpha_val);
+	sfDrawString(120, 120, float_array);
 
 	glutSwapBuffers();
 }
 
 void reshape(GLsizei w, GLsizei h)
 {
-	GLsizei limit;
 	if (w < h) {
-		limit = w;
+		glViewport(0, h / 2 - w / 2, w, w);
+		sfSetRasterSize(w, w);
 	}
 	else {
-		limit = h;
+		glViewport(w / 2 - h / 2, 0, h, h);
+		sfSetRasterSize(h, h);
 	}
-	glViewport(0, 0, limit, limit);
-	sfSetRasterSize(limit, limit);
 }
 
 void keyboard(unsigned char c, int x, int y)
