@@ -48,8 +48,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -85,6 +84,7 @@
     <ClCompile Include="common\VectorUtils3.c" />
     <ClCompile Include="common\Windows\glew.c" />
     <ClCompile Include="common\Windows\MicroGlut.c" />
+    <ClCompile Include="common\Windows\simplefont.c" />
     <ClCompile Include="main.cc" />
     <ClCompile Include="readraw.cpp" />
   </ItemGroup>
@@ -95,6 +95,7 @@
     <ClInclude Include="common\VectorUtils3.h" />
     <ClInclude Include="common\Windows\glew.h" />
     <ClInclude Include="common\Windows\MicroGlut.h" />
+    <ClInclude Include="common\Windows\simplefont.h" />
     <ClInclude Include="common\Windows\wglew.h" />
     <ClInclude Include="readraw.h" />
   </ItemGroup>

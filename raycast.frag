@@ -12,6 +12,10 @@ uniform float		alphaScale;
 uniform mat4		rotMat;
 uniform mat4		mdlMat;
 
+// bounding cube
+uniform vec3[8]		cubeVert;
+uniform int[36]		cubeInd;
+
 // Sobel 3D Filter Kernels, flipped. 
 mat3 sobelX_left = mat3(1, 0, -1,
 						2, 0, -2,
@@ -31,6 +35,7 @@ mat3 sobelZ_left = mat3(1, 2, 1,
 // sobelZ_middle is the 3x3 0-matrix.
 mat3 sobelZ_right = -1.0 * sobelZ_left;
 
+bool inVolume = false;
 // Helper boolean to visualize use of bounding cube
 bool usingPlane = false;
 
@@ -42,8 +47,7 @@ float textureAccess(vec3 voxelCoord, vec3 offset)
 
 // NOT DONE. Function to test ray-intersections with bounding-box of triangle.
 vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c, 
-						vec3 rayDir, vec3 quadCoord, 
-						float distance)
+						vec3 rayDir, vec3 quadCoord)
 {	vec3 enPoint = vec3(0,0,0);
 	vec3 a = vec3(mdlMat * vec4(_a, 1));
 	vec3 b = vec3(mdlMat * vec4(_b, 1));
@@ -63,10 +67,10 @@ vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c,
 		usingPlane = true;
 		return enPoint;
 		}
+		inVolume = true;
 	}
 	else
 	{
-		//discard;
 		return quadCoord;
 	}
 }
@@ -108,13 +112,30 @@ void main(void)
 
 	// Ray definitions
 	vec3 prp = vec3(0.5, 0.5, -focalLength + distance);
-	vec3 rayDir = normalize( vec3(texCoord, distance) - prp);
+	vec3 quadCoord = vec3(texCoord, distance);
+	vec3 rayDir = normalize(quadCoord - prp);
 	vec3 rayStep = rayDir*stepSize;
 
 	// Alternate these for use of bounding cube 
-	vec3 voxelCoord = vec3(texCoord, distance);
-	/*vec3 voxelCoord = intersectionPoint(vec3(1,0,0), vec3(1,1,0),vec3(0,1,0), 
-										rayDir, vec3(texCoord, distance), distance);*/
+	vec3 tempPoint, exPoint, entryPoint = vec3(0,0,0);
+	vec3 a, b, c;
+	for (int triangle = 0; triangle < 12; triangle++)
+	{
+		a = cubeVert[cubeInd[triangle*3]];
+		b = cubeVert[cubeInd[triangle*3+1]];
+		c = cubeVert[cubeInd[triangle*3+2]];
+		tempPoint = intersectionPoint(a, b, c, rayDir, quadCoord);
+		entryPoint = tempPoint;
+
+
+	}
+
+	if (inVolume == false) 
+	{ 
+		//discard; 
+	}
+
+	vec3 voxelCoord = entryPoint;
 	
 	// Hardcoded light source, negative Z due to prp definition (it's "behind" the screen, negative z)
 	vec3 light = vec3(0.5,0.53,-0.83);
@@ -127,7 +148,7 @@ void main(void)
 		intensitySample = textureAccess(voxelCoord, vec3(0,0,0));
 		
 		// toss samples that are basically black
-		if (intensitySample > 0.00) { 
+		if (intensitySample > 0.18) { 
 		// Alpha is scaled to intensity (kinda boring, x-ray-esque)
 		alphaSample = intensitySample * alphaScale;
 
@@ -160,8 +181,8 @@ void main(void)
 	float specular = intensity * 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3);
 	vec4 color = vec4(1.0, 1.0, 1.0, 0) * (ambient + diffuse + specular) + vec4(0,0,0,alpha);
 
-	/*if (usingPlane == true)
-		color = vec4(0.0, 0.0, 1.0, 1.0);*/ // This is to see the bounding cube
+	if (usingPlane == true)
+		color = vec4(0.0, 0.0, 1.0, 1.0); // This is to see the bounding cube
 
 	outColor = vec4(color);
 }

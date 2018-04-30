@@ -4,6 +4,7 @@
 #include "loadobj.h"
 #include "LoadTGA.h"
 #include "stdlib.h"
+#include "simplefont.h"
 
 #include "readraw.h"
 
@@ -19,14 +20,48 @@ GLuint grad_tex, vol_tex, shader, current_frag = 0;
 GLfloat step_size, focal_length = 2.0, distance = -0.2,  angle_y, angle_x, alpha_val = 0.25;
 mat4 rot_mat, mdl_mat;
 
+Point3D	cube[] = {
+	// Front
+	{ 0.0f, 0.0f, 0.0f },
+	{ 1.0f, 0.0f, 0.0f },
+	{ 1.0f, 1.0f, 0.0f },
+	{ 0.0f, 1.0f, 0.0f },
+	// Back
+	{ 0.0f, 0.0f, 1.0f },
+	{ 1.0f, 0.0f, 1.0f },
+	{ 1.0f, 1.0f, 1.0f },
+	{ 0.0f, 1.0f, 1.0f } };
+
+
 
 GLfloat quad[] = { 
 	-1.0f,-1.0f,0.0f,
 	-1.0f,1.0f,0.0f,
 	1.0f,1.0f,0.0f,
 	1.0f,-1.0f,0.0f };
+
 GLuint quad_ind[] = { 0,1,3,3,1,2 };
 
+GLint cube_ind[] = {
+	// front
+	0, 1, 2,
+	2, 3, 0,
+	// right
+	1, 5, 6,
+	6, 2, 1,
+	// back
+	7, 6, 5,
+	5, 4, 7,
+	// left
+	4, 0, 3,
+	3, 7, 4,
+	// bottom
+	4, 5, 1,
+	1, 0, 4,
+	// top
+	3, 2, 6,
+	6, 7, 3,
+};
 
 GLfloat quad_tex[] = { 
 	0.0f, 0.0f,
@@ -51,6 +86,7 @@ void initVolume()
 	printError("upload volume");
 
 	step_size = 1.f / XDIM;
+
 }
 
 
@@ -70,11 +106,14 @@ void init(void)
 
 	volume_array = readRaw2cArray("MRI-Head.raw", XDIM, YDIM, ZDIM);
 	initVolume();
-	// Upload the quad
 
+	// Make model out of quad data
 	m_quad = LoadDataToModel(quad, NULL, quad_tex, NULL, quad_ind, 4, 6);
-
 	
+
+	// Upload the cube to shader
+	glUniform3fv(glGetUniformLocation(shader, "cubeVert"), 8, &cube[0].x);
+	glUniform1iv(glGetUniformLocation(shader, "cubeInd"), 36, &cube_ind[0]);
 }
 
 void display(void)
@@ -152,6 +191,10 @@ void keyboard(unsigned char c, int x, int y)
 		if (current_frag == 1) {
 			shader = loadShaders("raycast.vert", "raycast.frag");
 			current_frag = 0;
+
+			// Upload the cube to shader
+			glUniform3fv(glGetUniformLocation(shader, "cubeVert"), 8, &cube[0].x);
+			glUniform1iv(glGetUniformLocation(shader, "cubeInd"), 36, &cube_ind[0]);
 		}
 		else if (current_frag == 0) {
 			shader = loadShaders("raycast.vert", "raycast_old.frag");
