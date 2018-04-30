@@ -60,6 +60,7 @@ vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c,
 		dot(planeNormal, cross(c-b, enPoint - b)) > 0 && 
 		dot(planeNormal, cross(a-c, enPoint - c)) > 0) 
 	{
+		inVolume = true;
 		if (t < 0) {
 		return quadCoord;
 		}
@@ -67,7 +68,7 @@ vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c,
 		usingPlane = true;
 		return enPoint;
 		}
-		inVolume = true;
+		
 	}
 	else
 	{
@@ -103,8 +104,6 @@ vec3 sobel3D(vec3 voxelCoord)
 
 void main(void)
 {
-	int steps = int(1.0 / stepSize);
-
 	// Final values from ray integral
 	float intensity = 0;
 	float alpha = 0;
@@ -116,26 +115,50 @@ void main(void)
 	vec3 rayDir = normalize(quadCoord - prp);
 	vec3 rayStep = rayDir*stepSize;
 
-	// Alternate these for use of bounding cube 
-	vec3 tempPoint, exPoint, entryPoint = vec3(0,0,0);
+	// Bounding cube test variables
+	vec3 tempPoint, exPoint, enPoint = vec3(quadCoord);
 	vec3 a, b, c;
+	float debug = 1;
+	bool first = true;
 	for (int triangle = 0; triangle < 12; triangle++)
 	{
 		a = cubeVert[cubeInd[triangle*3]];
 		b = cubeVert[cubeInd[triangle*3+1]];
 		c = cubeVert[cubeInd[triangle*3+2]];
 		tempPoint = intersectionPoint(a, b, c, rayDir, quadCoord);
-		entryPoint = tempPoint;
-
+		if (tempPoint == quadCoord) {
+			continue;
+		}
+		// First guess on what is the exit point of the ray
+		if (first == true)
+		{
+			exPoint = tempPoint;
+			first = false;
+			continue;
+		}
+		// Check if the guess was correct, swap coordinates if we weren't
+		if (length(tempPoint - quadCoord) > length(exPoint - quadCoord) )
+		{
+			enPoint = exPoint;
+			exPoint = tempPoint;
+			break;
+		}
+		else
+		{
+			enPoint = tempPoint;
+			break;
+		}
 
 	}
 
-	if (inVolume == false) 
-	{ 
-		//discard; 
+	if (inVolume == false) { 
+		discard; 
 	}
 
-	vec3 voxelCoord = entryPoint;
+	vec3 voxelCoord = enPoint;
+
+	int steps = int(length(enPoint - exPoint) /stepSize);
+
 	
 	// Hardcoded light source, negative Z due to prp definition (it's "behind" the screen, negative z)
 	vec3 light = vec3(0.5,0.53,-0.83);
@@ -148,7 +171,10 @@ void main(void)
 		intensitySample = textureAccess(voxelCoord, vec3(0,0,0));
 		
 		// toss samples that are basically black
-		if (intensitySample > 0.18) { 
+		if (intensitySample < 0.18) { 
+			voxelCoord += rayStep;
+			continue;
+		}
 		// Alpha is scaled to intensity (kinda boring, x-ray-esque)
 		alphaSample = intensitySample * alphaScale;
 
@@ -158,7 +184,6 @@ void main(void)
 
 		alpha += alphaSample;
 
-		}
 		// Stop ray if opacity is full
 		if (alpha >= 1.0) 
 		{	
@@ -181,8 +206,8 @@ void main(void)
 	float specular = intensity * 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3);
 	vec4 color = vec4(1.0, 1.0, 1.0, 0) * (ambient + diffuse + specular) + vec4(0,0,0,alpha);
 
-	if (usingPlane == true)
-		color = vec4(0.0, 0.0, 1.0, 1.0); // This is to see the bounding cube
+	/*if (usingPlane == true)
+		color = vec4(0.0, 0.0, debug, 1.0);*/ // This is to see the bounding cube
 
 	outColor = vec4(color);
 }
