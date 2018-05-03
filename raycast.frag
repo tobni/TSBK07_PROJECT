@@ -16,6 +16,11 @@ uniform mat4		mdlMat;
 uniform vec3[8]		cubeVert;
 uniform int[36]		cubeInd;
 
+float rand(vec2 st) {
+    return fract(sin(dot(st.xy,vec2(12.9898,78.233)))*343223.0123);
+}
+
+
 // Sobel 3D Filter Kernels, flipped. 
 mat3 sobelX_left = mat3(1, 0, -1,
 						2, 0, -2,
@@ -36,8 +41,6 @@ mat3 sobelZ_left = mat3(1, 2, 1,
 mat3 sobelZ_right = -1.0 * sobelZ_left;
 
 bool inVolume = false;
-// Helper boolean to visualize use of bounding cube
-bool usingPlane = false;
 
 // Function for readability. This is where coordinates are rotated, THEN accessed.
 float textureAccess(vec3 voxelCoord, vec3 offset)
@@ -48,25 +51,24 @@ float textureAccess(vec3 voxelCoord, vec3 offset)
 // Function to test ray-intersections with bounding-box of triangle.
 vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c, 
 						vec3 rayDir, vec3 quadCoord)
-{	vec3 enPoint = vec3(0,0,0);
+{	
 	vec3 a = vec3(mdlMat * vec4(_a, 1));
 	vec3 b = vec3(mdlMat * vec4(_b, 1));
 	vec3 c = vec3(mdlMat * vec4(_c, 1));
 	vec3 planeNormal = cross(b-a, c-a); 
 	float D = dot(planeNormal, a);
 	float t = (dot(a - quadCoord, planeNormal)) / dot(planeNormal, rayDir); 
-	enPoint = quadCoord + t * rayDir;
-	if (dot(planeNormal, cross(b-a, enPoint - a)) > 0 && 
-		dot(planeNormal, cross(c-b, enPoint - b)) > 0 && 
-		dot(planeNormal, cross(a-c, enPoint - c)) > 0) 
+	vec3 point = quadCoord + t * rayDir;
+	if (dot(planeNormal, cross(b-a, point - a)) > 0 && 
+		dot(planeNormal, cross(c-b, point - b)) > 0 && 
+		dot(planeNormal, cross(a-c, point - c)) > 0) 
 	{
 		inVolume = true;
 		if (t < 0) {
 		return quadCoord;
 		}
 		else {
-		usingPlane = true;
-		return enPoint;
+		return point;
 		}
 		
 	}
@@ -118,8 +120,8 @@ void main(void)
 	// Bounding cube test variables
 	vec3 tempPoint, exPoint = quadCoord, enPoint = quadCoord;
 	vec3 a, b, c;
-	float debug = 1;
 	bool first = true;
+
 	for (int triangle = 0; triangle < 12; triangle++)
 	{
 		a = cubeVert[cubeInd[triangle*3]];
@@ -155,11 +157,15 @@ void main(void)
 		discard; 
 	}
 
-	vec3 voxelCoord = enPoint;
+	// Pseudo-random ray-offset to reduce ringing
+	vec3 voxelCoord = enPoint + rayStep*(rand(enPoint.xy));
 
-	int steps = int(length(enPoint - exPoint) /stepSize);
+	int steps = int(length(enPoint - exPoint)/stepSize);
+	if (steps < 30)
+	{
+		discard;
+	}
 
-	
 	// Hardcoded light source, negative Z due to prp definition (it's "behind" the screen, negative z)
 	vec3 light = vec3(0.5,0.53,-0.83);
 
@@ -201,8 +207,6 @@ void main(void)
 	float specular = intensity * 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3);
 	vec4 color = vec4(1.0, 1.0, 1.0, 0) * (ambient + diffuse + specular) + vec4(0,0,0,alpha);
 
-	/*if (usingPlane == true)
-		color = vec4(0.0, 0.0, debug, 1.0);*/ // This is to see the bounding cube
 
 	outColor = vec4(color);
 }

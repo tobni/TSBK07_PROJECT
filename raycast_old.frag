@@ -17,8 +17,11 @@ uniform vec3[8]		cubeVert;
 uniform int[36]		cubeInd;
 
 bool inVolume = false;
-// Helper boolean to visualize use of bounding cube
-bool usingPlane = false;
+
+float rand(vec2 st) {
+    return fract(sin(dot(st.xy,vec2(12.9898,78.233)))*343223.0123);
+}
+
 
 // Function for readability. This is where coordinates are rotated, THEN accessed.
 float textureAccess(vec3 voxelCoord, vec3 offset)
@@ -46,7 +49,6 @@ vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c,
 		return quadCoord;
 		}
 		else {
-		usingPlane = true;
 		return enPoint;
 		}
 		
@@ -109,9 +111,15 @@ void main(void)
 		discard; 
 	}
 
-	vec3 voxelCoord = enPoint;
+	// Pseudo-random ray-offset to reduce ringing
+	vec3 voxelCoord = enPoint + rayStep*(rand(enPoint.xy));
 
 	int steps = int(length(enPoint - exPoint) /stepSize);
+	
+	if (steps < 2)
+	{
+		discard;
+	}
 
 	// Data gathered from the volume for each step
 	float intensitySample, alphaSample;	

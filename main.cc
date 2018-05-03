@@ -8,6 +8,8 @@
 
 #include "readraw.h"
 
+#define max(a,b) (((a)>(b))?(a):(b))
+
 int XDIM = 256;
 int YDIM = 256;
 int ZDIM = 256;
@@ -16,14 +18,14 @@ GLubyte* volume_array;
 GLshort* volume16_array;
 Model *m_quad;
 
-GLuint grad_tex, vol_tex, shader, current_frag = 0;
+GLuint vol_tex, shader, current_frag = 0, transfer_func;
 GLfloat step_size, focal_length = 2.0, distance = -0.2,  angle_y = 0.0, angle_x = 0.0, alpha_val = 0.25;
 mat4 rot_mat, mdl_mat;
 
-GLint m_viewport[4], window_width = 512, window_height = 512;
+GLint window_width = 512, window_height = 512;
 
 
-Point3D	cube[] = {
+vec3 cube[] = {
 	// Front
 	{ 0.0f, 0.0f, 0.0f },
 	{ 1.0f, 0.0f, 0.0f },
@@ -95,7 +97,7 @@ void initVolume()
 void init(void)
 {
 	// GL inits
-	glClearColor(1.0,1.0,1.0,0);
+	glClearColor(0.0,0.0,0.0,0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -115,6 +117,14 @@ void init(void)
 	// Upload the cube to shader
 	glUniform3fv(glGetUniformLocation(shader, "cubeVert"), 8, &cube[0].x);
 	glUniform1iv(glGetUniformLocation(shader, "cubeInd"), 36, &cube_ind[0]);
+
+	//Load Transfer Function
+	glActiveTexture(GL_TEXTURE1);
+	LoadTGATextureSimple("test.tga", &transfer_func);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glUniform1i(glGetUniformLocation(shader, "transferFunction"), 1); // Texture unit 1
 }
 
 void display(void)
@@ -193,8 +203,6 @@ void keyboard(unsigned char c, int x, int y)
 		break;
 	case 's':
 		distance -= 0.01;
-
-		printf("%f", distance);
 		glutPostRedisplay();
 		break;
 	case 'a':
@@ -234,6 +242,7 @@ void keyboard(unsigned char c, int x, int y)
 		glUniform3fv(glGetUniformLocation(shader, "cubeVert"), 8, &cube[0].x);
 		glUniform1iv(glGetUniformLocation(shader, "cubeInd"), 36, &cube_ind[0]);
 		glUniform1f(glGetUniformLocation(shader, "stepSize"), step_size);
+		glutPostRedisplay();
 		break;
 	case 1:
 		XDIM = 256;
@@ -272,6 +281,16 @@ void keyboard(unsigned char c, int x, int y)
 		initVolume();
 		glutPostRedisplay();
 		break;
+
+	case 5:
+		XDIM = 128;
+		YDIM = 256;
+		ZDIM = 256;
+		delete volume_array;
+		volume_array = readRaw2cArray("CT-head.raw", XDIM, YDIM, ZDIM);
+		initVolume();
+		glutPostRedisplay();
+		break;
 	}
 }
 
@@ -280,7 +299,7 @@ void keyboard(unsigned char c, int x, int y)
 int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
-	//glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowPosition(50, 50);
 	glutInitWindowSize(window_width, window_height);
 	glutInitContextVersion(3, 2);

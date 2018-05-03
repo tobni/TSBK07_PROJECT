@@ -30,22 +30,6 @@ GLubyte* readRaw2cArray(const char* filename, int x_dim, int y_dim, int z_dim)
 	fread(volumeArray, sizeof(GLubyte), size, file);
 	fclose(file);
 
-	// Clear first and last slices to 0
-	for (int z = 0; z < z_dim; z++)
-	{
-		for (int y = 0; y < y_dim; y++)
-		{
-			for (int x = 0; x < x_dim; x++)
-			{
-				if ((x == 0) || (x == x_dim - 1) ||
-					(y == 0) || (y == y_dim - 1) ||
-					(z == 0) || (z == z_dim - 1)) {
-				volumeArray[x + y*x_dim + z*x_dim*y_dim] = GLubyte(0);
-				}
-			}
-		}
-	}
-
 	return volumeArray;
 }
 
@@ -58,22 +42,6 @@ GLshort* readRaw2cArray16bit(const char* filename, int x_dim, int y_dim, int z_d
 	GLshort* volumeArray = new GLshort[size];
 	fread(volumeArray, sizeof(GLshort), size, file);
 	fclose(file);
-
-	// Clear first and last slices to 0
-	for (int z = 0; z < z_dim; z++)
-	{
-		for (int y = 0; y < y_dim; y++)
-		{
-			for (int x = 0; x < x_dim; x++)
-			{
-				if ((x == 0) || (x == x_dim - 1) ||
-					(y == 0) || (y == y_dim - 1) ||
-					(z == 0) || (z == z_dim - 1)) {
-					volumeArray[x + y * x_dim + z * x_dim*y_dim] = GLshort(0);
-				}
-			}
-		}
-	}
 
 	return volumeArray;
 }

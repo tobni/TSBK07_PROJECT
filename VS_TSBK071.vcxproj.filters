@@ -39,7 +39,7 @@
     <ClCompile Include="common\Windows\MicroGlut.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="common\Windows\simplefont.c">
+    <ClCompile Include="common\simplefont.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,7 +68,7 @@
     <ClInclude Include="readraw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common\Windows\simplefont.h">
+    <ClInclude Include="common\simplefont.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
