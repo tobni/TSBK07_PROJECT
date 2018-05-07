@@ -7,8 +7,10 @@
 #include "simplefont.h"
 
 #include "readraw.h"
+#include "math.h"
 
 #define max(a,b) (((a)>(b))?(a):(b))
+#define sgn(x) (x < 0) ? -1 : (x > 0)
 
 int XDIM = 256;
 int YDIM = 256;
@@ -24,6 +26,7 @@ mat4 rot_mat, mdl_mat;
 
 GLint window_width = 512, window_height = 512;
 
+GLuint font;
 
 vec3 cube[] = {
 	// Front
@@ -97,7 +100,7 @@ void initVolume()
 void init(void)
 {
 	// GL inits
-	glClearColor(0.0,0.0,0.0,0);
+	glClearColor(1.0,1.0,1.0,1.0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -153,26 +156,38 @@ void display(void)
 	DrawModel(m_quad, shader, "inPos", NULL, "inTexCoord");
 
 	// Print info
-	char float_array[16]; // will crash if 16 elem isn't enough to store the float
+	char float_array[16];
+	sfSetFont(font);
+	sfSetFontColor(0, 0, 0);
+
+	// Reset angles if full rotations
+	float deg_x = (int)(roundf(angle_x * 180 * 100) / 100) % 360;
+	float deg_y = (int)(roundf(angle_y * 180 * 100) / 100) % 360;
+	if ((int)(roundf(angle_x * 180 * 100) / 100) % 360 == 0) {
+		angle_x = 0;
+	};
+	if ((int)(roundf(angle_y * 180 * 100) / 100) % 360 == 0) {
+		angle_y = 0;
+	};
 
 	// X
 	sfDrawString(40, 40, "Rot(X): ");
-	sprintf(float_array, "%f", M_PI * angle_x);
+	sprintf(float_array, "%g", deg_x);
 	sfDrawString(110, 40, float_array);
 	
 	// Y
 	sfDrawString(40, 60, "Rot(Y): ");
-	sprintf(float_array, "%f", M_PI * angle_y);
+	sprintf(float_array, "%g", deg_y);
 	sfDrawString(110, 60, float_array);
 
 	// Distance
 	sfDrawString(40, 80, "Distance: ");
-	sprintf(float_array, "%f", distance);
+	sprintf(float_array, "%g", roundf(distance * 100) / 100);
 	sfDrawString(130, 80, float_array);
 
 	// Opacity
 	sfDrawString(40, 100, "Opacity: ");
-	sprintf(float_array, "%f", alpha_val);
+	sprintf(float_array, "%g", roundf(alpha_val * 100) / 100);
 	sfDrawString(120, 100, float_array);
 
 	glutSwapBuffers();
@@ -222,11 +237,11 @@ void keyboard(unsigned char c, int x, int y)
 		glutPostRedisplay();
 		break;
 	case '-':
-		alpha_val -= 0.001;
+		alpha_val -= 0.01;
 		glutPostRedisplay();
 		break;
 	case '+':
-		alpha_val += 0.001;
+		alpha_val += 0.01;
 		glutPostRedisplay();
 		break;
 	case 'f':
@@ -311,7 +326,7 @@ int main(int argc, char *argv[])
 	glutDisplayFunc(display); 
 	glutReshapeFunc(reshape);
 	init();
-	sfMakeRasterFont();
+	font = sfMakeRasterFont();	
 	sfSetRasterSize(window_width, window_height);
 	glutMainLoop();
 	exit(0);
