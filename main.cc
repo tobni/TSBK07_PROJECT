@@ -24,7 +24,7 @@ GLuint vol_tex, shader, current_frag = 0, transfer_func;
 GLfloat step_size, focal_length = 2.0, distance = -0.2,  angle_y = 0.0, angle_x = 0.0, alpha_val = 0.25;
 mat4 rot_mat, mdl_mat;
 
-GLint window_width = 512, window_height = 512;
+GLint window_width = 700, window_height = 700;
 
 GLuint font;
 
@@ -171,24 +171,24 @@ void display(void)
 	};
 
 	// X
-	sfDrawString(40, 40, "Rot(X): ");
+	sfDrawString(40, 60, "Rot(X): ");
 	sprintf(float_array, "%g", deg_x);
-	sfDrawString(110, 40, float_array);
+	sfDrawString(110, 60, float_array);
 	
 	// Y
-	sfDrawString(40, 60, "Rot(Y): ");
+	sfDrawString(40, 80, "Rot(Y): ");
 	sprintf(float_array, "%g", deg_y);
-	sfDrawString(110, 60, float_array);
+	sfDrawString(110, 80, float_array);
 
 	// Distance
-	sfDrawString(40, 80, "Distance: ");
+	sfDrawString(40, 100, "Distance: ");
 	sprintf(float_array, "%g", roundf(distance * 100) / 100);
-	sfDrawString(130, 80, float_array);
+	sfDrawString(130, 100, float_array);
 
 	// Opacity
-	sfDrawString(40, 100, "Opacity: ");
+	sfDrawString(40, 120, "Opacity: ");
 	sprintf(float_array, "%g", roundf(alpha_val * 100) / 100);
-	sfDrawString(120, 100, float_array);
+	sfDrawString(120, 120, float_array);
 
 	glutSwapBuffers();
 }
