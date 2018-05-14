@@ -20,7 +20,7 @@ GLubyte* volume_array;
 GLshort* volume16_array;
 Model *m_quad;
 
-GLuint vol_tex, shader, current_frag = 0, transfer_func;
+GLuint vol_tex, shader, current_frag = 0;
 GLfloat step_size, focal_length = 2.0, distance = -0.2,  angle_y = 0.0, angle_x = 0.0, alpha_val = 0.25;
 mat4 rot_mat, mdl_mat;
 
@@ -120,14 +120,6 @@ void init(void)
 	// Upload the cube to shader
 	glUniform3fv(glGetUniformLocation(shader, "cubeVert"), 8, &cube[0].x);
 	glUniform1iv(glGetUniformLocation(shader, "cubeInd"), 36, &cube_ind[0]);
-
-	//Load Transfer Function
-	glActiveTexture(GL_TEXTURE1);
-	LoadTGATextureSimple("test.tga", &transfer_func);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glUniform1i(glGetUniformLocation(shader, "transferFunction"), 1); // Texture unit 1
 }
 
 void display(void)

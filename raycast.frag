@@ -1,8 +1,8 @@
 #version 150
 
-in vec2 texCoord;
+in		vec2		texCoord;
 
-out vec4 outColor;
+out		vec4		outColor;
 
 uniform sampler3D	texVol;
 uniform float		stepSize;
@@ -16,6 +16,7 @@ uniform mat4		mdlMat;
 uniform vec3[8]		cubeVert;
 uniform int[36]		cubeInd;
 
+// Pseudo-random number generator
 float rand(vec2 st) {
     return fract(sin(dot(st.xy,vec2(12.9898,78.233)))*343223.0123);
 }
@@ -48,7 +49,7 @@ float textureAccess(vec3 voxelCoord, vec3 offset)
 	return texture(texVol, vec3(rotMat * vec4(voxelCoord + stepSize*offset, 1.0))).x;
 }
 
-// Function to test ray-intersections with bounding-box of triangle.
+// Function to test ray-intersections with triangle.
 vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c, 
 						vec3 rayDir, vec3 quadCoord)
 {	
