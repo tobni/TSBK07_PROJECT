@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
 	glutInitWindowPosition(50, 50);
 	glutInitWindowSize(window_width, window_height);
 	glutInitContextVersion(3, 2);
-	glutCreateWindow ("TSBK07");
+	glutCreateWindow ("TSBK07: Volume Renderer");
 #ifdef WIN32
 	glewInit();
 #endif
