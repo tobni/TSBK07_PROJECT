@@ -30,16 +30,16 @@
     <ClCompile Include="common\Windows\glew.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="readraw.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="common\Windows\MicroGlut.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="common\simplefont.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="readraw.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

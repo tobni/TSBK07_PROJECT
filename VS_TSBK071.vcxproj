@@ -85,8 +85,8 @@
     <ClCompile Include="common\Windows\glew.c" />
     <ClCompile Include="common\Windows\MicroGlut.c" />
     <ClCompile Include="common\simplefont.c" />
-    <ClCompile Include="main.cc" />
-    <ClCompile Include="readraw.cpp" />
+    <ClCompile Include="main.c" />
+    <ClCompile Include="readraw.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\GL_utilities.h" />

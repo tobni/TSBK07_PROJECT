@@ -3,11 +3,10 @@
 #include "VectorUtils3.h"
 #include "loadobj.h"
 #include "LoadTGA.h"
-#include "stdlib.h"
 #include "simplefont.h"
+#include "math.h"
 
 #include "readraw.h"
-#include "math.h"
 
 #define max(a,b) (((a)>(b))?(a):(b))
 #define sgn(x) (x < 0) ? -1 : (x > 0)
@@ -17,7 +16,6 @@ int YDIM = 256;
 int ZDIM = 256;
 
 GLubyte* volume_array;
-GLshort* volume16_array;
 Model *m_quad;
 
 GLuint vol_tex, shader, current_frag = 0;
@@ -255,7 +253,7 @@ void keyboard(unsigned char c, int x, int y)
 		XDIM = 256;
 		YDIM = 256;
 		ZDIM = 256;
-		delete volume_array;
+		free(volume_array);
 		volume_array = readRaw2cArray("MRI-Head.raw", XDIM, YDIM, ZDIM);
 		initVolume();
 		glutPostRedisplay();
@@ -265,7 +263,7 @@ void keyboard(unsigned char c, int x, int y)
 		XDIM = 256;
 		YDIM = 256;
 		ZDIM = 44;
-		delete volume_array;
+		free(volume_array);
 		volume_array = readRaw2cArray("frog.raw", XDIM, YDIM, ZDIM);
 		initVolume();
 		glutPostRedisplay();
@@ -274,7 +272,7 @@ void keyboard(unsigned char c, int x, int y)
 		XDIM = 256;
 		YDIM = 256;
 		ZDIM = 256;
-		delete volume_array;
+		free(volume_array);
 		volume_array = readRaw2cArray("foot.raw", XDIM, YDIM, ZDIM);
 		initVolume();
 		glutPostRedisplay();
@@ -283,7 +281,7 @@ void keyboard(unsigned char c, int x, int y)
 		XDIM = 384;
 		YDIM = 384;
 		ZDIM = 240;
-		delete volume_array;
+		free(volume_array);
 		volume_array = readRaw2cArray("CT-chest.raw", XDIM, YDIM, ZDIM);
 		initVolume();
 		glutPostRedisplay();
@@ -293,7 +291,7 @@ void keyboard(unsigned char c, int x, int y)
 		XDIM = 128;
 		YDIM = 256;
 		ZDIM = 256;
-		delete volume_array;
+		free(volume_array);
 		volume_array = readRaw2cArray("CT-head.raw", XDIM, YDIM, ZDIM);
 		initVolume();
 		glutPostRedisplay();
