@@ -110,7 +110,8 @@ void main(void)
 	// Final values from ray integral
 	float intensity = 0;
 	float alpha = 0;
-	vec3 gradient = vec3(0,0,0);
+	float phong = 0;
+	vec3 gradient = vec3(0,0,0), normal = vec3(0,0,0);
 
 	// Ray definitions
 	vec3 prp = vec3(0.5, 0.5, -focalLength + distance);
@@ -168,7 +169,7 @@ void main(void)
 	}
 
 	// Hardcoded light source, negative Z due to prp definition (it's "behind" the screen, negative z)
-	vec3 light = vec3(0.5,0.53,-0.83);
+	vec3 light = normalize(vec3(0.5,0.53,-0.83));
 
 	// Data gathered from the volume for each step
 	float intensitySample, alphaSample;
@@ -185,9 +186,14 @@ void main(void)
 		// Alpha is scaled to intensity (kinda boring, x-ray-esque)
 		alphaSample = intensitySample * alphaScale;
 
-		// Front-to-back composite acquisition along the ray for gradient and color
-		intensity += (1.0 - alpha) * intensitySample * alphaSample;
-		gradient += (1.0 - alpha) * sobel3D(voxelCoord) * alphaSample;
+		// Front-to-back compositing acquisition along the ray for color and opacity
+		gradient = sobel3D(voxelCoord);
+
+		// Phong shading from ray(eye)-direction and normal
+		vec3 normal = normalize(gradient);
+		phong = (1 + clamp(dot(normal, light), 0.0, 1.0) + 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3));
+		
+		intensity += (1.0 - alpha) * intensitySample * alphaSample * phong;
 
 		alpha += alphaSample;
 
@@ -200,14 +206,6 @@ void main(void)
 		// Advance the ray
 		voxelCoord += rayStep;
 	}
-	vec3 normal = normalize(gradient);
 
-	// Phong shading from ray(eye)-direction and normal
-	float ambient = intensity;
-	float diffuse = intensity * clamp(dot(normal, light), 0.0, 1.0);
-	float specular = intensity * 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3);
-	vec4 color = vec4(1.0, 1.0, 1.0, 0) * (ambient + diffuse + specular) + vec4(0,0,0,alpha);
-
-
-	outColor = vec4(color);
+	outColor = vec4(intensity, intensity, intensity, alpha);
 }
