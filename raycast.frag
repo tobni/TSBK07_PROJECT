@@ -1,8 +1,8 @@
 #version 150
 
-in		vec2		texCoord;
+in vec2 texCoord;
 
-out		vec4		outColor;
+out vec4 outColor;
 
 uniform	sampler3D	texVol;
 uniform	float		stepSize;
