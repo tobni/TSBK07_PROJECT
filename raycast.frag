@@ -4,13 +4,13 @@ in		vec2		texCoord;
 
 out		vec4		outColor;
 
-uniform sampler3D	texVol;
-uniform float		stepSize;
-uniform float		focalLength;
-uniform float		distance;
-uniform float		alphaScale;
-uniform mat4		rotMat;
-uniform mat4		mdlMat;
+uniform	sampler3D	texVol;
+uniform	float		stepSize;
+uniform	float		focalLength;
+uniform	float		distance;
+uniform	float		alphaScale;
+uniform	mat4		rotMat;
+uniform	mat4		mdlMat;
 
 // bounding cube
 uniform vec3[8]		cubeVert;
@@ -60,21 +60,20 @@ vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c,
 	float D = dot(planeNormal, a);
 	float t = (dot(a - quadCoord, planeNormal)) / dot(planeNormal, rayDir); 
 	vec3 point = quadCoord + t * rayDir;
-	if (dot(planeNormal, cross(b-a, point - a)) > 0 && 
+	if	(dot(planeNormal, cross(b-a, point - a)) > 0 && 
 		dot(planeNormal, cross(c-b, point - b)) > 0 && 
 		dot(planeNormal, cross(a-c, point - c)) > 0) 
 	{
 		inVolume = true;
 		if (t < 0) {
-		return quadCoord;
+			return quadCoord;
 		}
 		else {
-		return point;
+			return point;
 		}
 		
 	}
-	else
-	{
+	else {
 		return quadCoord;
 	}
 }
@@ -90,13 +89,13 @@ vec3 sobel3D(vec3 voxelCoord)
 		for(int j = 0; j < 3; j++) {
 			for(int k = 0; k < 3; k++) {
 				if (i == 0) {
-				gradient.xyz += vec3(sobelX_left[j][k], sobelY_left[j][k], sobelZ_left[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
+					gradient.xyz += vec3(sobelX_left[j][k], sobelY_left[j][k], sobelZ_left[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
 				}
 				if (i == 1) {
-				gradient.xy += vec2(sobelX_middle[j][k], sobelY_middle[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
+					gradient.xy += vec2(sobelX_middle[j][k], sobelY_middle[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
 				}
 				if (i == 2) {
-				gradient.xyz += vec3(sobelX_right[j][k], sobelY_right[j][k], sobelZ_right[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
+					gradient.xyz += vec3(sobelX_right[j][k], sobelY_right[j][k], sobelZ_right[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
 				}
 			}
 		}
@@ -190,7 +189,7 @@ void main(void)
 		gradient = sobel3D(voxelCoord);
 
 		// Phong shading from ray(eye)-direction and normal
-		vec3 normal = normalize(gradient);
+		normal = normalize(gradient);
 		phong = (1 + clamp(dot(normal, light), 0.0, 1.0) + 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3));
 		
 		intensity += (1.0 - alpha) * intensitySample * alphaSample * phong;
