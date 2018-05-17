@@ -63,9 +63,21 @@ vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c,
 	float D = -dot(planeNormal, a);
 	float t = -(dot(quadCoord, planeNormal) + D) / dot(planeNormal, rayDir); 
 	vec3 point = quadCoord + t * rayDir;
-	if (dot(planeNormal, cross(b-a, point - a)) > 0 && 
-	    dot(planeNormal, cross(c-b, point - b)) > 0 && 
-	    dot(planeNormal, cross(a-c, point - c)) > 0) 
+	
+	vec3 u = b - a;
+	vec3 v = c - a;
+	vec3 w = point - a;
+	float uu = dot(u, u);
+	float uv = dot(u, v);
+	float uw = dot(u, w);
+	float vv = dot(v,v);
+	float vw = dot(v, w);
+	float mu_denom = uv * uv - uu * vv; 
+	float mu1, mu2;
+	mu1 = (uv * vw - vv * uw) / mu_denom;
+	mu2 = (uv * uw - uu * vw) / mu_denom;
+
+	if ((0 < mu1) && (mu1 < 1) && (0 < mu2) && ( mu2 < 1) && ((mu1 + mu2) < 1)) 
 	{
 		inVolume = true;
 		if (t < 0) {
