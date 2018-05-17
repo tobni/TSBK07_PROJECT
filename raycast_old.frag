@@ -46,10 +46,10 @@ vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c,
 	{
 		inVolume = true;
 		if (t < 0) {
-		return quadCoord;
+			return quadCoord;
 		}
 		else {
-		return enPoint;
+			return enPoint;
 		}
 		
 	}

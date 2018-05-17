@@ -23,19 +23,22 @@ float rand(vec2 st) {
 
 
 // Sobel 3D Filter Kernels, flipped. 
-mat3 sobelX_left = mat3(1, 0, -1,
+mat3 sobelX_left = mat3(
+						1, 0, -1,
 						2, 0, -2,
 						1, 0, -1);
 mat3 sobelX_middle = 2 * sobelX_left;
 mat3 sobelX_right = sobelX_left;
 
-mat3 sobelY_left = mat3(1, 2, 1,
+mat3 sobelY_left = mat3(
+						1, 2, 1,
 						0, 0, 0,
 						-1, -2, -1);
 mat3 sobelY_middle = 2 * sobelY_left;
 mat3 sobelY_right = sobelY_left;
 
-mat3 sobelZ_left = mat3(1, 2, 1,
+mat3 sobelZ_left = mat3(
+						1, 2, 1,
 						2, 4, 2,
 						1, 2, 1);
 // sobelZ_middle is the 3x3 0-matrix.
@@ -57,12 +60,12 @@ vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c,
 	vec3 b = vec3(mdlMat * vec4(_b, 1));
 	vec3 c = vec3(mdlMat * vec4(_c, 1));
 	vec3 planeNormal = cross(b-a, c-a); 
-	float D = dot(planeNormal, a);
-	float t = (dot(a - quadCoord, planeNormal)) / dot(planeNormal, rayDir); 
+	float D = -dot(planeNormal, a);
+	float t = -(dot(quadCoord, planeNormal) + D) / dot(planeNormal, rayDir); 
 	vec3 point = quadCoord + t * rayDir;
-	if	(dot(planeNormal, cross(b-a, point - a)) > 0 && 
-		dot(planeNormal, cross(c-b, point - b)) > 0 && 
-		dot(planeNormal, cross(a-c, point - c)) > 0) 
+	if (dot(planeNormal, cross(b-a, point - a)) > 0 && 
+	    dot(planeNormal, cross(c-b, point - b)) > 0 && 
+	    dot(planeNormal, cross(a-c, point - c)) > 0) 
 	{
 		inVolume = true;
 		if (t < 0) {
