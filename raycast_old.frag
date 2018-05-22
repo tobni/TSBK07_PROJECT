@@ -116,7 +116,7 @@ void main(void)
 
 	int steps = int(length(enPoint - exPoint) /stepSize);
 	
-	if (steps < 2)
+	if (steps < 15)
 	{
 		discard;
 	}

@@ -49,16 +49,18 @@ bool inVolume = false;
 // Function for readability. This is where coordinates are rotated, THEN accessed.
 float textureAccess(vec3 voxelCoord, vec3 offset)
 {
-	return texture(texVol, vec3(rotMat * vec4(voxelCoord + stepSize*offset, 1.0))).x;
+	vec4 point = rotMat * vec4(voxelCoord + stepSize*offset, 1.0);
+	point = point / point.w;
+	return texture(texVol, vec3(point)).x;
 }
 
 // Function to test ray-intersections with triangle.
 vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c, 
 						vec3 rayDir, vec3 quadCoord)
 {	
-	vec3 a = vec3(mdlMat * vec4(_a, 1));
-	vec3 b = vec3(mdlMat * vec4(_b, 1));
-	vec3 c = vec3(mdlMat * vec4(_c, 1));
+	vec3 a = (mdlMat * vec4(_a, 1)).xyz / (mdlMat * vec4(_a, 1)).w;
+	vec3 b = (mdlMat * vec4(_b, 1)).xyz / (mdlMat * vec4(_b, 1)).w;
+	vec3 c = (mdlMat * vec4(_c, 1)).xyz / (mdlMat * vec4(_c, 1)).w;
 	vec3 planeNormal = cross(b-a, c-a); 
 	float D = -dot(planeNormal, a);
 	float t = -(dot(quadCoord, planeNormal) + D) / dot(planeNormal, rayDir); 
@@ -77,7 +79,7 @@ vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c,
 	mu1 = (uv * vw - vv * uw) / mu_denom;
 	mu2 = (uv * uw - uu * vw) / mu_denom;
 
-	if ((0 < mu1) && (mu1 < 1) && (0 < mu2) && ( mu2 < 1) && ((mu1 + mu2) < 1)) 
+	if ((0.0 < mu1) && (0.0 < mu2) && ((mu1 + mu2) < 1.0)) 
 	{
 		inVolume = true;
 		if (t < 0) {
@@ -115,7 +117,6 @@ vec3 sobel3D(vec3 voxelCoord)
 			}
 		}
 	}
-
 	return gradient;
 }
 
@@ -174,7 +175,7 @@ void main(void)
 	}
 
 	// Pseudo-random ray-offset to reduce ringing
-	vec3 voxelCoord = enPoint + rayStep*(rand(enPoint.xy));
+	vec3 voxelCoord = enPoint + rayStep*(rand(texCoord.xy));
 
 	int steps = int(length(enPoint - exPoint)/stepSize);
 	if (steps < 30)
@@ -202,10 +203,9 @@ void main(void)
 
 		// Front-to-back compositing acquisition along the ray for color and opacity
 		gradient = sobel3D(voxelCoord);
-
 		// Phong shading from ray(eye)-direction and normal
 		normal = normalize(gradient);
-		phong = (1 + clamp(dot(normal, light), 0.0, 1.0) + 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3));
+		phong = (1 + 1* clamp(dot(normal, light), 0.0, 1.0) + 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3));
 		
 		intensity += (1.0 - alpha) * intensitySample * alphaSample * phong;
 
@@ -221,5 +221,5 @@ void main(void)
 		voxelCoord += rayStep;
 	}
 
-	outColor = vec4(intensity, intensity, intensity, alpha);
+	outColor = vec4(vec3(intensity), alpha);
 }
