@@ -99,6 +99,11 @@
     <ClInclude Include="common\Windows\wglew.h" />
     <ClInclude Include="readraw.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="raycast.frag" />
+    <None Include="raycast.vert" />
+    <None Include="raycast_old.frag" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

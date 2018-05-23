@@ -2,7 +2,6 @@
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "loadobj.h"
-#include "LoadTGA.h"
 #include "simplefont.h"
 #include "math.h"
 
@@ -99,7 +98,6 @@ void init(void)
 {
 	// GL inits
 	glClearColor(1.0,1.0,1.0,1.0);
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	printError("GL inits");
@@ -128,11 +126,11 @@ void display(void)
 
 	rot_mat = Ry(M_PI * angle_y);
 	rot_mat = Mult(Rx(M_PI * angle_x), rot_mat);
+	mdl_mat = Transpose(rot_mat);
+
 	rot_mat = Mult(rot_mat, T(-0.5, -0.5, -0.5));
 	rot_mat = Mult(T(0.5, 0.5, 0.5), rot_mat);
 
-	mdl_mat = Ry(M_PI * -angle_y);
-	mdl_mat = Mult(mdl_mat, Rx(M_PI * -angle_x));
 	mdl_mat = Mult(mdl_mat, T(-0.5, -0.5, -0.5));
 	mdl_mat = Mult(T(0.5, 0.5, 0.5), mdl_mat);
 
@@ -151,12 +149,12 @@ void display(void)
 	sfSetFontColor(0, 0, 0);
 
 	// Reset angles if full rotations
-	float deg_x = (int)(roundf(angle_x * 180 * 100) / 100) % 360;
-	float deg_y = (int)(roundf(angle_y * 180 * 100) / 100) % 360;
-	if ((int)(roundf(angle_x * 180 * 100) / 100) % 360 == 0) {
+	float deg_x = (int)(roundf(angle_x * 180)) % 360;
+	float deg_y = (int)(roundf(angle_y * 180)) % 360;
+	if ((int)(roundf(angle_x * 180)) % 360 == 0) {
 		angle_x = 0;
 	};
-	if ((int)(roundf(angle_y * 180 * 100) / 100) % 360 == 0) {
+	if ((int)(roundf(angle_y * 180 )) % 360 == 0) {
 		angle_y = 0;
 	};
 
@@ -304,7 +302,7 @@ void keyboard(unsigned char c, int x, int y)
 int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowPosition(50, 50);
 	glutInitWindowSize(window_width, window_height);
 	glutInitContextVersion(3, 2);

@@ -1,16 +1,16 @@
 #version 150
 
-in		vec2		texCoord;
+in vec2 texCoord;
 
-out		vec4		outColor;
+out vec4 outColor;
 
-uniform sampler3D	texVol;
-uniform float		stepSize;
-uniform float		focalLength;
-uniform float		distance;
-uniform float		alphaScale;
-uniform mat4		rotMat;
-uniform mat4		mdlMat;
+uniform	sampler3D	texVol;
+uniform	float		stepSize;
+uniform	float		focalLength;
+uniform	float		distance;
+uniform	float		alphaScale;
+uniform	mat4		rotMat;
+uniform	mat4		mdlMat;
 
 // bounding cube
 uniform vec3[8]		cubeVert;
@@ -23,19 +23,22 @@ float rand(vec2 st) {
 
 
 // Sobel 3D Filter Kernels, flipped. 
-mat3 sobelX_left = mat3(1, 0, -1,
+mat3 sobelX_left = mat3(
+						1, 0, -1,
 						2, 0, -2,
 						1, 0, -1);
 mat3 sobelX_middle = 2 * sobelX_left;
 mat3 sobelX_right = sobelX_left;
 
-mat3 sobelY_left = mat3(1, 2, 1,
+mat3 sobelY_left = mat3(
+						1, 2, 1,
 						0, 0, 0,
 						-1, -2, -1);
 mat3 sobelY_middle = 2 * sobelY_left;
 mat3 sobelY_right = sobelY_left;
 
-mat3 sobelZ_left = mat3(1, 2, 1,
+mat3 sobelZ_left = mat3(
+						1, 2, 1,
 						2, 4, 2,
 						1, 2, 1);
 // sobelZ_middle is the 3x3 0-matrix.
@@ -46,35 +49,48 @@ bool inVolume = false;
 // Function for readability. This is where coordinates are rotated, THEN accessed.
 float textureAccess(vec3 voxelCoord, vec3 offset)
 {
-	return texture(texVol, vec3(rotMat * vec4(voxelCoord + stepSize*offset, 1.0))).x;
+	vec4 point = rotMat * vec4(voxelCoord + stepSize*offset, 1.0);
+	point = point / point.w;
+	return texture(texVol, vec3(point)).x;
 }
 
 // Function to test ray-intersections with triangle.
 vec3 intersectionPoint(	vec3 _a, vec3 _b, vec3 _c, 
 						vec3 rayDir, vec3 quadCoord)
 {	
-	vec3 a = vec3(mdlMat * vec4(_a, 1));
-	vec3 b = vec3(mdlMat * vec4(_b, 1));
-	vec3 c = vec3(mdlMat * vec4(_c, 1));
+	vec3 a = (mdlMat * vec4(_a, 1)).xyz / (mdlMat * vec4(_a, 1)).w;
+	vec3 b = (mdlMat * vec4(_b, 1)).xyz / (mdlMat * vec4(_b, 1)).w;
+	vec3 c = (mdlMat * vec4(_c, 1)).xyz / (mdlMat * vec4(_c, 1)).w;
 	vec3 planeNormal = cross(b-a, c-a); 
-	float D = dot(planeNormal, a);
-	float t = (dot(a - quadCoord, planeNormal)) / dot(planeNormal, rayDir); 
+	float D = -dot(planeNormal, a);
+	float t = -(dot(quadCoord, planeNormal) + D) / dot(planeNormal, rayDir); 
 	vec3 point = quadCoord + t * rayDir;
-	if (dot(planeNormal, cross(b-a, point - a)) > 0 && 
-		dot(planeNormal, cross(c-b, point - b)) > 0 && 
-		dot(planeNormal, cross(a-c, point - c)) > 0) 
+	
+	vec3 u = b - a;
+	vec3 v = c - a;
+	vec3 w = point - a;
+	float uu = dot(u, u);
+	float uv = dot(u, v);
+	float uw = dot(u, w);
+	float vv = dot(v,v);
+	float vw = dot(v, w);
+	float mu_denom = uv * uv - uu * vv; 
+	float mu1, mu2;
+	mu1 = (uv * vw - vv * uw) / mu_denom;
+	mu2 = (uv * uw - uu * vw) / mu_denom;
+
+	if ((0.0 < mu1) && (0.0 < mu2) && ((mu1 + mu2) < 1.0)) 
 	{
 		inVolume = true;
 		if (t < 0) {
-		return quadCoord;
+			return quadCoord;
 		}
 		else {
-		return point;
+			return point;
 		}
 		
 	}
-	else
-	{
+	else {
 		return quadCoord;
 	}
 }
@@ -90,18 +106,17 @@ vec3 sobel3D(vec3 voxelCoord)
 		for(int j = 0; j < 3; j++) {
 			for(int k = 0; k < 3; k++) {
 				if (i == 0) {
-				gradient.xyz += vec3(sobelX_left[j][k], sobelY_left[j][k], sobelZ_left[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
+					gradient.xyz += vec3(sobelX_left[j][k], sobelY_left[j][k], sobelZ_left[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
 				}
 				if (i == 1) {
-				gradient.xy += vec2(sobelX_middle[j][k], sobelY_middle[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
+					gradient.xy += vec2(sobelX_middle[j][k], sobelY_middle[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
 				}
 				if (i == 2) {
-				gradient.xyz += vec3(sobelX_right[j][k], sobelY_right[j][k], sobelZ_right[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
+					gradient.xyz += vec3(sobelX_right[j][k], sobelY_right[j][k], sobelZ_right[j][k]) * textureAccess(voxelCoord, vec3(k-1,j-1,i-1));
 				}
 			}
 		}
 	}
-
 	return gradient;
 }
 
@@ -160,7 +175,7 @@ void main(void)
 	}
 
 	// Pseudo-random ray-offset to reduce ringing
-	vec3 voxelCoord = enPoint + rayStep*(rand(enPoint.xy));
+	vec3 voxelCoord = enPoint + rayStep*(rand(texCoord.xy));
 
 	int steps = int(length(enPoint - exPoint)/stepSize);
 	if (steps < 30)
@@ -188,10 +203,9 @@ void main(void)
 
 		// Front-to-back compositing acquisition along the ray for color and opacity
 		gradient = sobel3D(voxelCoord);
-
 		// Phong shading from ray(eye)-direction and normal
-		vec3 normal = normalize(gradient);
-		phong = (1 + clamp(dot(normal, light), 0.0, 1.0) + 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3));
+		normal = normalize(gradient);
+		phong = (1 + 1* clamp(dot(normal, light), 0.0, 1.0) + 0.2 * pow(max(0.0, dot(reflect(light, normal), rayDir)),3));
 		
 		intensity += (1.0 - alpha) * intensitySample * alphaSample * phong;
 
@@ -207,5 +221,5 @@ void main(void)
 		voxelCoord += rayStep;
 	}
 
-	outColor = vec4(intensity, intensity, intensity, alpha);
+	outColor = vec4(vec3(intensity), alpha);
 }
